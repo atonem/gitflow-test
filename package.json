@@ -1,0 +1,19 @@
+{
+  "name": "gitflow-test",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "format": "prettier --write scripts/*",
+    "branch": "zx scripts/branch.mjs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "inquirer": "8",
+    "lodash": "^4.17.21",
+    "prettier": "^3.2.5",
+    "zx": "^8.0.2"
+  }
+}
