@@ -3,7 +3,7 @@
 import inquirer from "inquirer";
 import _ from "lodash";
 
-const BRANCH_TYPES = ["feature", "release", "hotfix"];
+const BRANCH_TYPES = ["feature", "bug", "release", "hotfix"];
 
 const TICKET_REGEX = /[A-Z]+-\d+/;
 const SCR_REGEX = /SCR-\d+/;
