@@ -66,12 +66,14 @@ jobs:
           script: |
             console.log('whats context?', context);
             const { owner, repo, number } = context.issue;
-            await github.rest.issues.createComment({
+            const comment = await github.rest.issues.createComment({
               owner,
               repo,
               issue_number: number,
               body: 'Testign creating a comment!',
-            })
+            });
+
+            console.log('comment?', JSON.stringify(comment, null, 2));
 
             const pull = await github.rest.pulls.get({
               owner,
