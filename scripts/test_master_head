@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+
+GITHUB_BASE_REF="master"
+GITHUB_HEAD_REF=$1
+GITHUB_STEP_SUMMARY=step_summary.md
+echo "" > $GITHUB_STEP_SUMMARY
+
+if [[ $GITHUB_HEAD_REF == release/* ]] \
+|| [[ $GITHUB_HEAD_REF == hotfix/* ]]
+then
+  echo "# :white_check_mark: Success" >> $GITHUB_STEP_SUMMARY
+  echo "\`$GITHUB_HEAD_REF\` is a valid branch to merge in to \`$GITHUB_BASE_REF\`." \
+    >> $GITHUB_STEP_SUMMARY
+else
+  echo "# :x: Failure" >> $GITHUB_STEP_SUMMARY
+  echo "\`$GITHUB_HEAD_REF\` is **not** a valid branch to merge in to \`$GITHUB_BASE_REF\`." \
+    >> $GITHUB_STEP_SUMMARY
+  echo "" >> $GITHUB_STEP_SUMMARY
+  echo "## Valid branch patterns" >> $GITHUB_STEP_SUMMARY
+  echo '- `release/*`' >> $GITHUB_STEP_SUMMARY
+  echo '- `hotfix/*`' >> $GITHUB_STEP_SUMMARY
+
+  exit 1
+fi

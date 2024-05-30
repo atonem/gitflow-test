@@ -1,0 +1,58 @@
+name: "Verify PR Branch Name"
+on:
+  pull_request_target:
+    branches:
+      - master
+      - develop
+jobs:
+  verify_develop_head_name:
+    if:  github.base_ref == 'develop'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify head branch name
+        run: |
+          if [[ $GITHUB_HEAD_REF == feature/* ]] \
+          || [[ $GITHUB_HEAD_REF == bugfix/* ]] \
+          || [[ $GITHUB_HEAD_REF == backmerge/* ]] \
+          || [[ $GITHUB_HEAD_REF == master ]]
+          then
+            echo "# :white_check_mark: Success" >> $GITHUB_STEP_SUMMARY
+            echo "\`$GITHUB_HEAD_REF\` is a valid branch to merge in to \`$GITHUB_BASE_REF\`." \
+              >> $GITHUB_STEP_SUMMARY
+          else
+            echo "# :x: Failure" >> $GITHUB_STEP_SUMMARY
+            echo "\`$GITHUB_HEAD_REF\` is **not** a valid branch to merge in to \`$GITHUB_BASE_REF\`." \
+              >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "## Valid branch patterns" >> $GITHUB_STEP_SUMMARY
+            echo '- `feature/*`' >> $GITHUB_STEP_SUMMARY
+            echo '- `bugfix/*`' >> $GITHUB_STEP_SUMMARY
+            echo '- `backmerge/*`' >> $GITHUB_STEP_SUMMARY
+            echo '- `master`' >> $GITHUB_STEP_SUMMARY
+
+            exit 1
+          fi
+
+  verify_master_head_name:
+    if:  github.base_ref == 'master'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify head branch name
+        run: |
+          if [[ $GITHUB_HEAD_REF == release/* ]] \
+          || [[ $GITHUB_HEAD_REF == hotfix/* ]]
+          then
+            echo "# :white_check_mark: Success" >> $GITHUB_STEP_SUMMARY
+            echo "\`$GITHUB_HEAD_REF\` is a valid branch to merge in to \`$GITHUB_BASE_REF\`." \
+              >> $GITHUB_STEP_SUMMARY
+          else
+            echo "# :x: Failure" >> $GITHUB_STEP_SUMMARY
+            echo "\`$GITHUB_HEAD_REF\` is **not** a valid branch to merge in to \`$GITHUB_BASE_REF\`." \
+              >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "## Valid branch patterns" >> $GITHUB_STEP_SUMMARY
+            echo '- `release/*`' >> $GITHUB_STEP_SUMMARY
+            echo '- `hotfix/*`' >> $GITHUB_STEP_SUMMARY
+
+            exit 1
+          fi
