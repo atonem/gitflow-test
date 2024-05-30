@@ -1,6 +1,8 @@
 # TODO:
 # store step output
 # https://stackoverflow.com/a/57989070
+# create issue/pr comment: https://octokit.github.io/rest.js/v18#issues-create-comment
+# update review comment: https://octokit.github.io/rest.js/v18#pulls-update-review-comment
 name: "Verify PR Branch Name"
 on:
   pull_request_target:
@@ -9,10 +11,10 @@ on:
       - develop
 jobs:
   verify_develop_head_name:
-    if:  github.base_ref == 'develop'
     runs-on: ubuntu-latest
     steps:
-      - name: Verify head branch name
+      - name: Verify develop head branch name
+        if: github.base_ref == 'develop'
         run: |
           if [[ $GITHUB_HEAD_REF == feature/* ]] \
           || [[ $GITHUB_HEAD_REF == bugfix/* ]] \
@@ -35,17 +37,9 @@ jobs:
 
             exit 1
           fi
-      - name: Create workflow status PR comment
-        uses: actions/github-script@v7
-        with:
-          script: |
-            console.log('whats context?', context);
 
-  verify_master_head_name:
-    if:  github.base_ref == 'master'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Verify head branch name
+      - name: Verify master head branch name
+        if: github.base_ref == 'master'
         run: |
           if [[ $GITHUB_HEAD_REF == release/* ]] \
           || [[ $GITHUB_HEAD_REF == hotfix/* ]]
@@ -64,3 +58,25 @@ jobs:
 
             exit 1
           fi
+
+      - name: Create workflow status PR comment
+        uses: actions/github-script@v7
+        if: always()
+        with:
+          script: |
+            console.log('whats context?', context);
+            const { owner, repo, number } = context;
+            github.rest.issues.createComment({
+              owner,
+              repo,
+              issue_number: number,
+              body: 'Testign creating a comment!',
+            })
+
+            const pull = await github.rest.pulls.get({
+              owner,
+              repo,
+              pull_number: number,
+            });
+            console.log('pull?', JSON.stringify(pull, null, 2));
+
