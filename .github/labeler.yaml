@@ -17,6 +17,4 @@ release:
 backmerge:
   - all:
     - base-branch: develop
-    - head-branch:
-      - master
-      - ^backmerge/
+    - head-branch: '^(master|backmerge/)'
