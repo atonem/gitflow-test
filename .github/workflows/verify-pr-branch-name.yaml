@@ -65,8 +65,8 @@ jobs:
         with:
           script: |
             console.log('whats context?', context);
-            const { owner, repo, number } = context;
-            github.rest.issues.createComment({
+            const { owner, repo, number } = context.issue;
+            await github.rest.issues.createComment({
               owner,
               repo,
               issue_number: number,
