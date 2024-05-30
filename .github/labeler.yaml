@@ -1,0 +1,22 @@
+feature:
+  - all:
+    - base-branch: develop
+    - head-branch: ^feature/
+bugfix:
+  - all:
+    - base-branch: develop
+    - head-branch: ^bugfix/
+hotfix:
+  - all:
+    - base-branch: master
+    - head-branch: ^hotfix/
+release:
+  - all:
+    - base-branch: master
+    - head-branch: ^release/
+backmerge:
+  - all:
+    - base-branch: develop
+    - head-branch:
+      - master
+      - ^backmerge/
