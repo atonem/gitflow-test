@@ -1,3 +1,6 @@
+# TODO:
+# store step output
+# https://stackoverflow.com/a/57989070
 name: "Verify PR Branch Name"
 on:
   pull_request_target:
@@ -32,6 +35,11 @@ jobs:
 
             exit 1
           fi
+      - name: Create workflow status PR comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            console.log('whats context?', context);
 
   verify_master_head_name:
     if:  github.base_ref == 'master'
