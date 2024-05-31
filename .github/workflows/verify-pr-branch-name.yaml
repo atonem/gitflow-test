@@ -28,9 +28,8 @@ jobs:
             const MASTER_NAME = 'master';
             const DEVELOP_NAME = 'develop';
             const { base, head } = context.payload.pull_request ?? {};
-            console.log('pull request?', context.payload.pull_request);
-            const BASE_NAME = base?.name;
-            const HEAD_NAME = head?.name;
+            const BASE_NAME = base?.ref;
+            const HEAD_NAME = head?.ref;
             function verifyHeadName(baseName, headName) {
               switch (baseName) {
                 case MASTER_NAME:
