@@ -2,6 +2,8 @@
 name: "Merge PR"
 on:
   pull_request_target:
+    types:
+      - labeled
     branches:
       - master
       - develop
@@ -10,7 +12,13 @@ jobs:
     if: github.event.label.name == 'merge'
     runs-on: ubuntu-latest
     steps:
+      - run: echo "$GITHUB_CONTEXT"
       - uses: actions/github-script@v7
         with:
           script: |
             console.log('will merge PR', context);
+              github.rest.pulls.merge({
+                owner,
+                repo,
+                pull_number,
+              });
