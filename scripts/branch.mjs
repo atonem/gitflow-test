@@ -1,9 +1,9 @@
 #!/usr/bin/env zx
 
-import inquirer from "inquirer";
-import _ from "lodash";
+import inquirer from 'inquirer';
+import _ from 'lodash';
 
-const BRANCH_TYPES = ["feature", "bug", "release", "hotfix"];
+const BRANCH_TYPES = ['feature', 'bug', 'release', 'hotfix'];
 
 const TICKET_REGEX = /[A-Z]+-\d+/;
 const SCR_REGEX = /SCR-\d+/;
@@ -14,11 +14,11 @@ const SCR_REGEX = /SCR-\d+/;
 //   process.exit(1);
 // }
 
-console.log("argv?", argv);
+console.log('argv?', argv);
 function createValidateTicket(release) {
   return release
-    ? (value) => SCR_REGEX.test(value)
-    : (value) => !value || TICKET_REGEX.test(value);
+    ? value => SCR_REGEX.test(value)
+    : value => !value || TICKET_REGEX.test(value);
 }
 function createBranchName(type, ticket, slug) {
   let branch = `${type}/`;
@@ -35,43 +35,43 @@ function createBranchName(type, ticket, slug) {
 const { type } = BRANCH_TYPES.includes(argv.type)
   ? argv.type
   : await inquirer.prompt({
-      name: "type",
-      type: "list",
-      message: "branch type",
+      name: 'type',
+      type: 'list',
+      message: 'branch type',
       choices: BRANCH_TYPES,
       validate: BRANCH_TYPES.includes,
     });
 
-const IS_RELEASE = type === "release";
-const IS_HOTFIX = type === "hotfix";
+const IS_RELEASE = type === 'release';
+const IS_HOTFIX = type === 'hotfix';
 
 const { ticket } = TICKET_REGEX.test(argv.ticket)
   ? argv.type
   : await inquirer.prompt({
-      name: "ticket",
-      message: "ticket",
+      name: 'ticket',
+      message: 'ticket',
       validate: createValidateTicket(IS_RELEASE),
     });
 
 const { slug } = IS_RELEASE
-  ? { slug: "" }
+  ? { slug: '' }
   : argv.slug
     ? _.kebabCase(agv.slug)
     : await inquirer.prompt({
-        name: "slug",
-        message: "name",
+        name: 'slug',
+        message: 'name',
         filter: _.kebabCase,
-        validate: (value) => (ticket ? true : 0 < value.length),
+        validate: value => (ticket ? true : 0 < value.length),
       });
 
 const branch = createBranchName(type, ticket, slug);
 const currentBranch = await $`git branch --show-current`
   .then(String)
-  .then((v) => v.trim());
+  .then(v => v.trim());
 
-if (IS_HOTFIX && currentBranch !== "master") {
+if (IS_HOTFIX && currentBranch !== 'master') {
   await $`git checkout master`;
-} else if (currentBranch !== "develop") {
+} else if (currentBranch !== 'develop') {
   await $`git checkout develop`;
 }
 
