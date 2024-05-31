@@ -76,7 +76,7 @@ jobs:
         uses: peter-evans/find-comment@v3
         id: find_comment
         with:
-          issue-number: github.event.number
+          issue-number: ${{ github.event.number }}
           comment-author: github-actions
           body-includes: Verify branch name
 
@@ -84,7 +84,7 @@ jobs:
         if: '!cancelled()'
         uses: peter-evans/create-or-update-comment@v4
         with:
-          comment-id: steps.find_comment.outputs.comment-id
-          issue-number: github.event.number
-          body: steps.verify_branch_name.outputsa.statusMessage
+          comment-id: ${{ steps.find_comment.outputs.comment-id }}
+          issue-number: ${{ github.event.number }}
+          body: ${{ steps.verify_branch_name.outputsa.statusMessage }}
           edit-mode: replace
