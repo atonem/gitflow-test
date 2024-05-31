@@ -80,16 +80,11 @@ jobs:
           comment-author: github-actions
           body-includes: Verify branch name
 
-      - name: Create comment
-        if: steps.find_comment.outputs.comment-id == ''
-        uses: peter-evans/create-or-update-comment@v4
-        with:
-          issue-number: github.event.pull_request.number
-          body: steps.verify_branch_name.outputsa.statusMessage
-
-      - name: Update comment
-        if: steps.find_comment.outputs.comment-id != ''
+      - name: Create or update comment
+        if: '!cancelled()'
         uses: peter-evans/create-or-update-comment@v4
         with:
           comment-id: steps.find_comment.outputs.comment-id
+          issue-number: github.event.pull_request.number
           body: steps.verify_branch_name.outputsa.statusMessage
+          edit-mode: replace
