@@ -6,6 +6,9 @@
 name: "Verify PR Branch Name"
 on:
   pull_request_target:
+    types:
+      - opened
+      - synchronize
     branches:
       - master
       - develop
