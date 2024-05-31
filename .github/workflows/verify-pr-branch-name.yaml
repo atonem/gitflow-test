@@ -10,73 +10,86 @@ on:
       - master
       - develop
 jobs:
-  verify_develop_head_name:
+  verify_base_head_branch:
     runs-on: ubuntu-latest
     steps:
-      - name: Verify develop head branch name
-        if: github.base_ref == 'develop'
-        run: |
-          if [[ $GITHUB_HEAD_REF == feature/* ]] \
-          || [[ $GITHUB_HEAD_REF == bugfix/* ]] \
-          || [[ $GITHUB_HEAD_REF == backmerge/* ]] \
-          || [[ $GITHUB_HEAD_REF == master ]]
-          then
-            echo "# :white_check_mark: Success" >> $GITHUB_STEP_SUMMARY
-            echo "\`$GITHUB_HEAD_REF\` is a valid branch to merge in to \`$GITHUB_BASE_REF\`." \
-              >> $GITHUB_STEP_SUMMARY
-          else
-            echo "# :x: Failure" >> $GITHUB_STEP_SUMMARY
-            echo "\`$GITHUB_HEAD_REF\` is **not** a valid branch to merge in to \`$GITHUB_BASE_REF\`." \
-              >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "## Valid branch patterns" >> $GITHUB_STEP_SUMMARY
-            echo '- `feature/*`' >> $GITHUB_STEP_SUMMARY
-            echo '- `bugfix/*`' >> $GITHUB_STEP_SUMMARY
-            echo '- `backmerge/*`' >> $GITHUB_STEP_SUMMARY
-            echo '- `master`' >> $GITHUB_STEP_SUMMARY
-
-            exit 1
-          fi
-
-      - name: Verify master head branch name
-        if: github.base_ref == 'master'
-        run: |
-          if [[ $GITHUB_HEAD_REF == release/* ]] \
-          || [[ $GITHUB_HEAD_REF == hotfix/* ]]
-          then
-            echo "# :white_check_mark: Success" >> $GITHUB_STEP_SUMMARY
-            echo "\`$GITHUB_HEAD_REF\` is a valid branch to merge in to \`$GITHUB_BASE_REF\`." \
-              >> $GITHUB_STEP_SUMMARY
-          else
-            echo "# :x: Failure" >> $GITHUB_STEP_SUMMARY
-            echo "\`$GITHUB_HEAD_REF\` is **not** a valid branch to merge in to \`$GITHUB_BASE_REF\`." \
-              >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "## Valid branch patterns" >> $GITHUB_STEP_SUMMARY
-            echo '- `release/*`' >> $GITHUB_STEP_SUMMARY
-            echo '- `hotfix/*`' >> $GITHUB_STEP_SUMMARY
-
-            exit 1
-          fi
-
-      - name: Create workflow status PR comment
-        uses: actions/github-script@v7
-        if: always()
+      - uses: actions/github-script@v7
+        id: verify_branch_name
         with:
+          result-encoding: string
           script: |
-            console.log('whats context?', context);
-            const { owner, repo, number } = context.issue;
-            await github.rest.issues.createComment({
-              owner,
-              repo,
-              issue_number: number,
-              body: 'Testign creating a comment!',
-            })
+            const VALID_DEVELOP_HEAD_NAMES = [
+              /^feature\/.+/,
+              /^bugfix\/.+/,
+              /^backmerge\/.+/,
+              /^master$/,
+            ];
+            const VALID_MASTER_HEAD_NAMES = [/^release\/.+/, /^hotfix\/.+/];
+            const MASTER_NAME = 'master';
+            const DEVELOP_NAME = 'develop';
+            const { base, head } = context.payload.pull_request ?? {};
+            const BASE_NAME = base?.name;
+            const HEAD_NAME = head?.name;
+            function verifyHeadName(baseName, headName) {
+              switch (baseName) {
+                case MASTER_NAME:
+                  return VALID_MASTER_HEAD_NAMES.some(t => t.test(headName));
+                case DEVELOP_NAME:
+                  return VALID_DEVELOP_HEAD_NAMES.some(t => t.test(headName));
+                default:
+                  return false;
+              }
+            }
+            const successMessageTemplate = (
+              baseName,
+              headName,
+            ) => `## :white_check_mark: Verify branch name: success
+            \`${headName}\` is a **valid** branch to merge in to \`${baseName}\`.
+            `;
+            const failureMessageTemplate = (
+              baseName,
+              headName,
+            ) => `## :x: Verify branch name: failure
+            \`${headName}\` is an **invalid** branch to merge in to \`${baseName}\`.
 
-            const pull = await github.rest.pulls.get({
-              owner,
-              repo,
-              pull_number: number,
-            });
-            console.log('pull?', JSON.stringify(pull, null, 2));
+            ### Valid branch head patterns
+            ${(baseName === DEVELOP_NAME ? VALID_DEVELOP_HEAD_NAMES : VALID_MASTER_HEAD_NAMES).map(pattern => `- \`${pattern}\``).join('\n')}
+            `;
+            let success = false;
+            if (BASE_NAME && HEAD_NAME) {
+              const success2 = verifyHeadName(BASE_NAME, HEAD_NAME);
+              const message = success2
+                ? successMessageTemplate(BASE_NAME, HEAD_NAME)
+                : failureMessageTemplate(BASE_NAME, HEAD_NAME);
+              core.summary.addRaw(message, true);
+              core.setOutput('statusMessage', message);
+              if (!success2) {
+                core.setFailed(`${HEAD_NAME} can't be merged into ${BASE_NAME}`);
+              }
+            } else {
+              core.setFailed(
+                `Could not get PR head ("${HEAD_NAME}") and/or base ("${BASE_NAME}") name`,
+              );
+            }
 
+      - name: Find existing comment
+        uses: peter-evans/find-comment@v3
+        id: find_comment
+        with:
+          issue-number: github.event.pull_request.number
+          comment-author: github-actions
+          body-includes: Verify branch name
+
+      - name: Create comment
+        if: steps.find_comment.outputs.comment-id == ''
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          issue-number: github.event.pull_request.number
+          body: steps.verify_branch_name.outputsa.statusMessage
+
+      - name: Update comment
+        if: steps.find_comment.outputs.comment-id != ''
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          comment-id: steps.find_comment.outputs.comment-id
+          body: steps.verify_branch_name.outputsa.statusMessage
