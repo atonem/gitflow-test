@@ -1,6 +1,7 @@
 # see https://octokit.github.io/rest.js/v20#pulls-merge
 name: "Merge PR"
 on:
+  workflow_dispatch:
   pull_request_target:
     types:
       - labeled
@@ -17,8 +18,3 @@ jobs:
         with:
           script: |
             console.log('will merge PR', context);
-              github.rest.pulls.merge({
-                owner,
-                repo,
-                pull_number,
-              });
