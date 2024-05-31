@@ -1,3 +1,5 @@
 node_modules/
+# built files
+dist/
 # generated test files
 step_summary.md
