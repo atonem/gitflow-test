@@ -86,5 +86,5 @@ jobs:
         with:
           comment-id: ${{ steps.find_comment.outputs.comment-id }}
           issue-number: ${{ github.event.number }}
-          body: ${{ steps.verify_branch_name.outputsa.statusMessage }}
+          body: ${{ steps.verify_branch_name.outputs.statusMessage }}
           edit-mode: replace
