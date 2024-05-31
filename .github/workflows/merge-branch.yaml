@@ -1,0 +1,16 @@
+# see https://octokit.github.io/rest.js/v20#pulls-merge
+name: "Merge PR"
+on:
+  pull_request_target:
+    branches:
+      - master
+      - develop
+jobs:
+  merge_branch:
+    if: github.event.label.name == 'merge'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            console.log('will merge PR', context);
