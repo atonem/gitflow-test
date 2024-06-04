@@ -17,3 +17,4 @@ jobs:
         with:
           script: |
             console.log('will merge PR', context);
+            console.log('head branch', context.payload.pull_request?.head);
