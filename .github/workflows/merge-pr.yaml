@@ -18,3 +18,10 @@ jobs:
           script: |
             console.log('will merge PR', context);
             console.log('head branch', context.payload.pull_request?.head);
+            // TODO: Add contents
+
+      - name: Remove "merge" label on failure
+        if: 'failed() || cancelled()'
+        run: gh pr edit ${{ github.event.number }} --remove-label merge
+
+
