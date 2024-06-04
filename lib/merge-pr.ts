@@ -46,21 +46,20 @@ const { repo, owner } = context.repo;
 const {
   base,
   head,
-  label,
   number: pull_number,
   mergeable,
   merged,
   draft,
 } = context.payload.pull_request ?? ({} as any);
 
-const BASE_NAME = base?.name;
-const { sha, name: HEAD_NAME } = head ?? ({} as any);
+const BASE_NAME = base?.ref;
+const { sha, ref: HEAD_NAME } = head ?? ({} as any);
 
 const merge_method = getMergeMethod(BASE_NAME, HEAD_NAME);
 
 if (draft || !mergeable || merged) {
   throw new Error(
-    `PR is alredy merged (${merged}), not mergeable (${mergeable}), or in draft (${draft}) mode.`,
+    `PR is alredy merged (${merged}), not mergeable (${mergeable}), and/or in draft (${draft}) mode.`,
   );
 }
 
