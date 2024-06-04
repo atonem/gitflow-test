@@ -27,9 +27,7 @@ jobs:
               },
             };
             function getMergeMethod(baseName, headName) {
-              console.log('getMergeMethod', { baseName, headName, MERGE_METHOD_MAP })
               const map = MERGE_METHOD_MAP[baseName];
-              console.log('getMergeMethodm map', { map });
               const entries = Object.entries(map);
               for (const [strat, patterns] of entries) {
                 if (patterns.some(pattern => pattern.test(headName))) {
@@ -50,10 +48,8 @@ jobs:
               merged,
               draft,
             } = context.payload.pull_request ?? {};
-            console.log('whats head/base?', { head, base });
-            console.log('andpayload?', context.payload);
-            const BASE_NAME = base?.name;
-            const { sha, name: HEAD_NAME } = head ?? {};
+            const BASE_NAME = base?.ref;
+            const { sha, ref: HEAD_NAME } = head ?? {};
             const merge_method = getMergeMethod(BASE_NAME, HEAD_NAME);
             if (draft || !mergeable || merged) {
               throw new Error(
