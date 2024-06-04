@@ -65,7 +65,7 @@ jobs:
             });
 
       - name: Remove "merge" label on failure
-        if: 'failed() || cancelled()'
+        if: 'failure() || cancelled()'
         run: gh pr edit ${{ github.event.number }} --remove-label merge
 
 
