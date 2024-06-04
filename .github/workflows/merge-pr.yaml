@@ -1,7 +1,6 @@
 # see https://octokit.github.io/rest.js/v20#pulls-merge
 name: "Merge PR"
 on:
-  workflow_dispatch:
   pull_request_target:
     types:
       - labeled
