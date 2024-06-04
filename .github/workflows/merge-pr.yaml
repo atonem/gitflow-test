@@ -16,9 +16,53 @@ jobs:
       - uses: actions/github-script@v7
         with:
           script: |
-            console.log('will merge PR', context);
-            console.log('head branch', context.payload.pull_request?.head);
-            // TODO: Add contents
+            const MERGE_METHOD_MAP = {
+              develop: {
+                merge: [/^master$/, /^backmerge\/.+/],
+                squash: [/^feature\/.+/, /^bugfix\/.+/],
+              },
+              master: {
+                merge: [/^release\/.+$/],
+                squash: [/^hotfix\/.+$/],
+              },
+            };
+            function getMergeMethod(baseName, headName) {
+              const map = MERGE_METHOD_MAP[baseName];
+              const entries = Object.entries(map);
+              for (const [strat, patterns] of entries) {
+                if (patterns.some(pattern => pattern.test(headName))) {
+                  return strat;
+                }
+              }
+              throw new Error(
+                `No matching merge strategy found for base (${baseName}) from head (${headName}) found`,
+              );
+            }
+            const { repo, owner } = context.repo;
+            const {
+              base,
+              head,
+              label,
+              number: pull_number,
+              mergeable,
+              merged,
+              draft,
+            } = context.payload.pull_request ?? {};
+            const BASE_NAME = base?.name;
+            const { sha, name: HEAD_NAME } = head ?? {};
+            const merge_method = getMergeMethod(BASE_NAME, HEAD_NAME);
+            if (draft || !mergeable || merged) {
+              throw new Error(
+                `PR is alredy merged (${merged}), not mergeable (${mergeable}), or in draft (${draft}) mode.`,
+              );
+            }
+            github.rest.pulls.merge({
+              owner,
+              repo,
+              pull_number,
+              // NOTE: make sure only performing a merge on the commit the label was added
+              sha,
+            });
 
       - name: Remove "merge" label on failure
         if: 'failed() || cancelled()'

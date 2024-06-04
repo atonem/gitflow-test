@@ -10,7 +10,8 @@
     "lint": "tsc",
     "format": "prettier --write scripts/*.mjs lib/**",
     "branch": "zx scripts/branch.mjs",
-    "verifyBrancName": "ts-node lib/verify-branch-name.ts"
+    "verifyBrancName": "ts-node lib/verify-branch-name.ts",
+    "mergePr": "ts-node lib/merge-pr.ts"
   },
   "keywords": [],
   "author": "",
