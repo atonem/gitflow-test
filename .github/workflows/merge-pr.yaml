@@ -42,7 +42,6 @@ jobs:
             const {
               base,
               head,
-              label,
               number: pull_number,
               mergeable,
               merged,
@@ -53,7 +52,7 @@ jobs:
             const merge_method = getMergeMethod(BASE_NAME, HEAD_NAME);
             if (draft || !mergeable || merged) {
               throw new Error(
-                `PR is alredy merged (${merged}), not mergeable (${mergeable}), or in draft (${draft}) mode.`,
+                `PR is alredy merged (${merged}), not mergeable (${mergeable}), and/or in draft (${draft}) mode.`,
               );
             }
             github.rest.pulls.merge({

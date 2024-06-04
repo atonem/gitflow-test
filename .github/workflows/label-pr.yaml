@@ -1,4 +1,4 @@
-name: "PR Labeler"
+name: "PR (un)labeler"
 on:
   - pull_request_target
 
@@ -12,3 +12,8 @@ jobs:
     - uses: actions/labeler@v5
       with:
         configuration-path: .github/labeler.yaml
+
+  # TODO:
+  remove_merge_label:
+    if: github.event.label.name == 'merge'
+    runs-on: ubuntu-latest
